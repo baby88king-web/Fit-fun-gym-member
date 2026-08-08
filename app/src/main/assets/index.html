@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIT FUN GYM - Data Member</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+    color:#111;
+}
+
+header{
+    background:#111;
+    color:white;
+    text-align:center;
+    padding:18px 10px;
+    font-size:23px;
+    font-weight:bold;
+}
+
+header small{
+    font-size:14px;
+    font-weight:normal;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:14px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.stat{
+    background:white;
+    border-radius:12px;
+    padding:12px 5px;
+    text-align:center;
+    box-shadow:0 1px 4px #ccc;
+}
+
+.stat b{
+    display:block;
+    font-size:22px;
+    margin-bottom:4px;
+}
+
+.add{
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:10px;
+    background:#111;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.search{
+    width:100%;
+    padding:13px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+    margin-bottom:10px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:10px;
+    box-shadow:0 1px 4px #ccc;
+}
+
+.name{
+    font-size:19px;
+    font-weight:bold;
+}
+
+.number{
+    color:#666;
+    margin-top:3px;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:bold;
+    margin:7px 0;
+}
+
+.harian{
+    background:#e5efff;
+    color:#1455a0;
+}
+
+.bulanan{
+    background:#e4f7e8;
+    color:#147331;
+}
+
+.aktif{
+    color:#168038;
+    font-weight:bold;
+}
+
+.expired{
+    color:#c00000;
+    font-weight:bold;
+}
+
+.detail{
+    font-size:13px;
+    color:#555;
+    line-height:1.6;
+}
+
+.actions{
+    display:flex;
+    gap:7px;
+    margin-top:10px;
+}
+
+.actions button{
+    flex:1;
+    padding:10px;
+    border:0;
+    border-radius:8px;
+    background:#eee;
+    font-weight:bold;
+}
+
+.backup{
+    display:flex;
+    gap:8px;
+    margin-top:15px;
+}
+
+.backup button{
+    flex:1;
+    padding:11px 5px;
+    border:0;
+    border-radius:8px;
+    background:#ddd;
+    font-weight:bold;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#0008;
+    padding:15px;
+    overflow:auto;
+}
+
+.box{
+    max-width:600px;
+    margin:25px auto;
+    background:white;
+    border-radius:14px;
+    padding:18px;
+}
+
+.box h2{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin:12px 0 5px;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:9px;
+    font-size:16px;
+}
+
+.save{
+    width:100%;
+    padding:13px;
+    margin-top:16px;
+    border:0;
+    border-radius:9px;
+    background:#111;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.close{
+    width:100%;
+    padding:13px;
+    margin-top:8px;
+    border:0;
+    border-radius:9px;
+    background:#ddd;
+    font-weight:bold;
+}
+
+.note{
+    color:#666;
+    font-size:12px;
+    margin-top:5px;
+}
+
+@media(max-width:450px){
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .stats .stat:last-child{
+        grid-column:1 / 3;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+FIT FUN GYM
+<br>
+<small>DATA MEMBER</small>
+</header>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat">
+            <b id="total">0</b>
+            Total
+        </div>
+
+        <div class="stat">
+            <b id="active">0</b>
+            Aktif
+        </div>
+
+        <div class="stat">
+            <b id="expired">0</b>
+            Expired
+        </div>
+    </div>
+
+    <button class="add" onclick="openForm()">
+        ＋ TAMBAH MEMBER
+    </button>
+
+    <input
+        class="search"
+        id="search"
+        placeholder="🔍 Cari nama / nomor member..."
+        oninput="render()"
+    >
+
+    <div id="list"></div>
+
+    <div class="backup">
+        <button onclick="backupData()">💾 BACKUP</button>
+        <button onclick="restoreData()">♻️ RESTORE</button>
+    </div>
+
+</div>
+
+
+<div class="modal" id="modal">
+
+<div class="box">
+
+<h2 id="formTitle">Tambah Member</h2>
+
+<input type="hidden" id="editId">
+
+<label>Nomor Member</label>
+<input id="nomor" placeholder="Contoh: FF001">
+
+<label>Nama Member</label>
+<input id="nama" placeholder="Nama lengkap member">
+
+<label>Status Member</label>
+
+<select id="jenis" onchange="toggleBulanan()">
+    <option value="HARIAN">HARIAN</option>
+    <option value="BULANAN">BULANAN</option>
+</select>
+
+<label>Tanggal Pembuatan Kartu</label>
+<input id="buat" type="date" onchange="updateExpired()">
+
+<label>Expired Kartu</label>
+<input id="expiredKartu" type="date">
+
+<div id="bulanBox">
+
+<label>Aktif Bulanan Sampai</label>
+<input id="aktifSampai" type="date">
+
+<div class="note">
+Untuk member BULANAN, kartu tetap berlaku 1 tahun,
+sedangkan masa aktif latihan berlaku sesuai tanggal bulanan.
+</div>
+
+</div>
+
+<button class="save" onclick="saveMember()">
+SIMPAN MEMBER
+</button>
+
+<button class="close" onclick="closeForm()">
+BATAL
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+let data =
+JSON.parse(localStorage.getItem("ffgym_members") || "[]");
+
+
+function today(){
+
+    let d = new Date();
+
+    let y = d.getFullYear();
+    let m = String(d.getMonth()+1).padStart(2,"0");
+    let day = String(d.getDate()).padStart(2,"0");
+
+    return y+"-"+m+"-"+day;
+}
+
+
+function addYears(dateString, years){
+
+    let d = new Date(dateString+"T12:00:00");
+
+    d.setFullYear(d.getFullYear()+years);
+
+    return d.toISOString().slice(0,10);
+}
+
+
+function addMonths(dateString, months){
+
+    let d = new Date(dateString+"T12:00:00");
+
+    d.setMonth(d.getMonth()+months);
+
+    return d.toISOString().slice(0,10);
+}
+
+
+function formatDate(date){
+
+    if(!date) return "-";
+
+    let p=date.split("-");
+
+    return p[2]+"/"+p[1]+"/"+p[0];
+}
+
+
+function getStatus(member){
+
+    let now=today();
+
+    if(member.jenis==="BULANAN"){
+
+        return member.aktifSampai >= now
+            ? "AKTIF"
+            : "EXPIRED";
+
+    }
+
+    return member.expiredKartu >= now
+        ? "AKTIF"
+        : "EXPIRED";
+}
+
+
+function escapeHTML(text){
+
+    return String(text || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function render(){
+
+    let keyword =
+        document.getElementById("search")
+        .value.toLowerCase();
+
+    let filtered=data.filter(function(m){
+
+        return (
+            (m.nama+" "+m.nomor)
+            .toLowerCase()
+            .includes(keyword)
+        );
+
+    });
+
+
+    let active=data.filter(function(m){
+        return getStatus(m)==="AKTIF";
+    }).length;
+
+
+    let expired=data.filter(function(m){
+        return getStatus(m)==="EXPIRED";
+    }).length;
+
+
+    document.getElementById("total").textContent=data.length;
+
+    document.getElementById("active").textContent=active;
+
+    document.getElementById("expired").textContent=expired;
+
+
+    let html="";
+
+
+    filtered.forEach(function(m){
+
+        let status=getStatus(m);
+
+        html += `
+        <div class="card">
+
+            <div class="name">
+                ${escapeHTML(m.nama)}
+            </div>
+
+            <div class="number">
+                No. Member: ${escapeHTML(m.nomor)}
+            </div>
+
+            <span class="badge ${m.jenis.toLowerCase()}">
+                ${m.jenis}
+            </span>
+
+            <div class="${status==="AKTIF" ? "aktif" : "expired"}">
+                ${status}
+            </div>
+
+            <div class="detail">
+
+                Kartu:
+                ${formatDate(m.buat)}
+                →
+                ${formatDate(m.expiredKartu)}
+
+                ${
+                    m.jenis==="BULANAN"
+                    ?
+                    `<br>
+                    Aktif sampai:
+                    <b>${formatDate(m.aktifSampai)}</b>`
+                    :
+                    ""
+                }
+
+            </div>
+
+            <div class="actions">
+
+                <button onclick="editMember('${m.id}')">
+                    ✏️ EDIT
+                </button>
+
+                <button onclick="deleteMember('${m.id}')">
+                    🗑️ HAPUS
+                </button>
+
+            </div>
+
+        </div>
+        `;
+
+    });
+
+
+    if(!html){
+
+        html=`
+        <div class="card">
+            Belum ada data member.
+        </div>
+        `;
+
+    }
+
+
+    document.getElementById("list").innerHTML=html;
+}
+
+
+function openForm(member){
+
+    document.getElementById("modal").style.display="block";
+
+
+    if(member){
+
+        document.getElementById("formTitle")
+        .textContent="Edit Member";
+
+        document.getElementById("editId")
+        .value=member.id;
+
+        document.getElementById("nomor")
+        .value=member.nomor;
+
+        document.getElementById("nama")
+        .value=member.nama;
+
+        document.getElementById("jenis")
+        .value=member.jenis;
+
+        document.getElementById("buat")
+        .value=member.buat;
+
+        document.getElementById("expiredKartu")
+        .value=member.expiredKartu;
+
+        document.getElementById("aktifSampai")
+        .value=member.aktifSampai || "";
+
+    }else{
+
+        document.getElementById("formTitle")
+        .textContent="Tambah Member";
+
+        document.getElementById("editId").value="";
+
+        document.getElementById("nomor").value="";
+
+        document.getElementById("nama").value="";
+
+        document.getElementById("jenis").value="HARIAN";
+
+        document.getElementById("buat").value=today();
+
+        document.getElementById("expiredKartu")
+        .value=addYears(today(),1);
+
+        document.getElementById("aktifSampai")
+        .value=addMonths(today(),1);
+
+    }
+
+    toggleBulanan();
+}
+
+
+function closeForm(){
+
+    document.getElementById("modal").style.display="none";
+
+}
+
+
+function toggleBulanan(){
+
+    document.getElementById("bulanBox").style.display =
+        document.getElementById("jenis").value==="BULANAN"
+        ? "block"
+        : "none";
+
+}
+
+
+function updateExpired(){
+
+    let dibuat=document.getElementById("buat").value;
+
+    if(dibuat){
+
+        document.getElementById("expiredKartu")
+        .value=addYears(dibuat,1);
+
+        document.getElementById("aktifSampai")
+        .value=addMonths(dibuat,1);
+
+    }
+
+}
+
+
+function saveMember(){
+
+    let nomor=
+        document.getElementById("nomor").value.trim();
+
+    let nama=
+        document.getElementById("nama").value.trim();
+
+    let jenis=
+        document.getElementById("jenis").value;
+
+    let buat=
+        document.getElementById("buat").value;
+
+    let expiredKartu=
+        document.getElementById("expiredKartu").value;
+
+    let aktifSampai=
+        document.getElementById("aktifSampai").value;
+
+
+    if(!nomor || !nama || !buat){
+
+        alert("Nomor, nama, dan tanggal pembuatan wajib diisi.");
+
+        return;
+
+    }
+
+
+    let id=
+        document.getElementById("editId").value
+        || Date.now().toString();
+
+
+    let member={
+
+        id:id,
+
+        nomor:nomor,
+
+        nama:nama,
+
+        jenis:jenis,
+
+        buat:buat,
+
+        expiredKartu:expiredKartu,
+
+        aktifSampai:
+            jenis==="BULANAN"
+            ? aktifSampai
+            : ""
+
+    };
+
+
+    let index=data.findIndex(function(m){
+        return m.id===id;
+    });
+
+
+    if(index>=0){
+
+        data[index]=member;
+
+    }else{
+
+        data.push(member);
+
+    }
+
+
+    localStorage.setItem(
+        "ffgym_members",
+        JSON.stringify(data)
+    );
+
+
+    closeForm();
+
+    render();
+
+}
+
+
+function editMember(id){
+
+    let member=data.find(function(m){
+        return m.id===id;
+    });
+
+    if(member){
+
+        openForm(member);
+
+    }
+
+}
+
+
+function deleteMember(id){
+
+    if(!confirm("Hapus member ini?")) return;
+
+
+    data=data.filter(function(m){
+        return m.id!==id;
+    });
+
+
+    localStorage.setItem(
+        "ffgym_members",
+        JSON.stringify(data)
+    );
+
+
+    render();
+
+}
+
+
+function backupData(){
+
+    let text=
+        JSON.stringify(data,null,2);
+
+    let blob=
+        new Blob([text],{
+            type:"application/json"
+        });
+
+
+    let url=
+        URL.createObjectURL(blob);
+
+
+    let a=
+        document.createElement("a");
+
+    a.href=url;
+
+    a.download="backup_member_ffgym.json";
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+function restoreData(){
+
+    let input=
+        document.createElement("input");
+
+    input.type="file";
+
+    input.accept=".json";
+
+
+    input.onchange=function(){
+
+        let file=input.files[0];
+
+        if(!file) return;
+
+
+        let reader=new FileReader();
+
+
+        reader.onload=function(){
+
+            try{
+
+                let imported=
+                    JSON.parse(reader.result);
+
+
+                if(!Array.isArray(imported)){
+
+                    throw new Error();
+
+                }
+
+
+                data=imported;
+
+
+                localStorage.setItem(
+                    "ffgym_members",
+                    JSON.stringify(data)
+                );
+
+
+                render();
+
+
+                alert("Data berhasil dipulihkan.");
+
+            }catch(e){
+
+                alert("File backup tidak valid.");
+
+            }
+
+        };
+
+
+        reader.readAsText(file);
+
+    };
+
+
+    input.click();
+
+}
+
+
+render();
+
+</script>
+
+</body>
+</html>
